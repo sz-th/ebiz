@@ -1,0 +1,12 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.9.23'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Paczka JDBC SQLite
+    implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
+}
