@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  helloworld-app:
+    build:
+      context: ../4.5
+      dockerfile: Dockerfile
+    image: <twoj_login>/zadanie1:4.5
+    container_name: kotlin_gradle_sqlite
