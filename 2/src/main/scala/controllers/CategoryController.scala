@@ -5,10 +5,13 @@ import org.scalatra.json._
 import org.json4s.{DefaultFormats, Formats}
 import models.Category
 
-class CategoryController extends ScalatraServlet with JacksonJsonSupport {
+class CategoryController extends ScalatraServlet with JacksonJsonSupport with CorsSupport{
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
   var categories = List(Category(1, "Elektronika"), Category(2, "Biurowe"))
 
+  options("/*") {
+    response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"))
+  }
   before() { contentType = formats("json") }
 
   get("/") { categories }

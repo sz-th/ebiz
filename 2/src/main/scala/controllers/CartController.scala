@@ -5,10 +5,13 @@ import org.scalatra.json._
 import org.json4s.{DefaultFormats, Formats}
 import models.Cart
 
-class CartController extends ScalatraServlet with JacksonJsonSupport {
+class CartController extends ScalatraServlet with JacksonJsonSupport with CorsSupport{
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
   var cartItems = List(Cart(1, 1, 2)) // Koszyk np: id=1, productId=1, qty=2
 
+  options("/*") {
+    response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"))
+  }
   before() { contentType = formats("json") }
 
   get("/") { cartItems }

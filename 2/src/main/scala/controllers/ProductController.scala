@@ -5,13 +5,16 @@ import org.scalatra.json._
 import org.json4s.{DefaultFormats, Formats}
 import models.Product
 
-class ProductController extends ScalatraServlet with JacksonJsonSupport {
+class ProductController extends ScalatraServlet with JacksonJsonSupport with CorsSupport {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
   var products = List(
     Product(1, "Laptop", 3500.0),
     Product(2, "Myszka", 150.0)
   )
+  options("/*") {
+    response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"))
+  }
 
   before() {
     contentType = formats("json")
