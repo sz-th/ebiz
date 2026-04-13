@@ -11,11 +11,17 @@ import (
 
 var db *gorm.DB
 
+type Category struct {
+	gorm.Model
+	Name string `json:"name"`
+}
 
 type Product struct {
 	gorm.Model
 	Name  string  `json:"name"`
 	Price float64 `json:"price"`
+	CategoryID uint     `json:"category_id"`
+	Category   Category `json:"category" gorm:"foreignKey:CategoryID"`
 }
 
 type Cart struct {
@@ -30,7 +36,23 @@ func initDB() {
 		panic("Nie udało się połączyć z bazą danych")
 	}
 
-	db.AutoMigrate(&Product{}, &Cart{})
+	db.AutoMigrate(&Category{}, &Product{}, &Cart{})
+}
+
+
+func createCategory(c echo.Context) error {
+	cat := new(Category)
+	if err := c.Bind(cat); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format danych"})
+	}
+	db.Create(cat)
+	return c.JSON(http.StatusCreated, cat)
+}
+
+func getCategories(c echo.Context) error {
+	var cats []Category
+	db.Find(&cats)
+	return c.JSON(http.StatusOK, cats)
 }
 
 
@@ -45,14 +67,14 @@ func createProduct(c echo.Context) error {
 
 func getProducts(c echo.Context) error {
 	var products []Product
-	db.Find(&products)
+	db.Preload("Category").Find(&products)
 	return c.JSON(http.StatusOK, products)
 }
 
 func getProduct(c echo.Context) error {
 	id := c.Param("id")
 	var p Product
-	if err := db.First(&p, id).Error; err != nil {
+	if err := db.Preload("Category").First(&p, id).Error; err != nil {
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Produkt nie istnieje"})
 	}
 	return c.JSON(http.StatusOK, p)
@@ -72,8 +94,10 @@ func updateProduct(c echo.Context) error {
 
 	p.Name = updateData.Name
 	p.Price = updateData.Price
+	p.CategoryID = updateData.CategoryID
 	db.Save(&p)
 	
+	db.Preload("Category").First(&p, p.ID)
 	return c.JSON(http.StatusOK, p)
 }
 
@@ -89,14 +113,12 @@ func deleteProduct(c echo.Context) error {
 }
 
 
-// Create Cart (POST)
 func createCart(c echo.Context) error {
 	cart := Cart{Status: "active"}
 	db.Create(&cart)
 	return c.JSON(http.StatusCreated, cart)
 }
 
-// Get Cart (GET)
 func getCart(c echo.Context) error {
 	id := c.Param("id")
 	var cart Cart
@@ -112,6 +134,9 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	e.POST("/categories", createCategory)
+	e.GET("/categories", getCategories)
 
 	e.POST("/products", createProduct)
 	e.GET("/products", getProducts)
