@@ -11,10 +11,16 @@ import (
 
 var db *gorm.DB
 
+
 type Product struct {
 	gorm.Model
 	Name  string  `json:"name"`
 	Price float64 `json:"price"`
+}
+
+type Cart struct {
+	gorm.Model
+	Status string `json:"status" gorm:"default:'active'"`
 }
 
 func initDB() {
@@ -24,12 +30,10 @@ func initDB() {
 		panic("Nie udało się połączyć z bazą danych")
 	}
 
-	db.AutoMigrate(&Product{})
+	db.AutoMigrate(&Product{}, &Cart{})
 }
 
-//CRUD and GORM
 
-// Create
 func createProduct(c echo.Context) error {
 	p := new(Product)
 	if err := c.Bind(p); err != nil {
@@ -39,14 +43,12 @@ func createProduct(c echo.Context) error {
 	return c.JSON(http.StatusCreated, p)
 }
 
-// Read All
 func getProducts(c echo.Context) error {
 	var products []Product
 	db.Find(&products)
 	return c.JSON(http.StatusOK, products)
 }
 
-// Read One
 func getProduct(c echo.Context) error {
 	id := c.Param("id")
 	var p Product
@@ -75,7 +77,6 @@ func updateProduct(c echo.Context) error {
 	return c.JSON(http.StatusOK, p)
 }
 
-// Delete
 func deleteProduct(c echo.Context) error {
 	id := c.Param("id")
 	var p Product
@@ -85,6 +86,24 @@ func deleteProduct(c echo.Context) error {
 
 	db.Delete(&p)
 	return c.NoContent(http.StatusNoContent)
+}
+
+
+// Create Cart (POST)
+func createCart(c echo.Context) error {
+	cart := Cart{Status: "active"}
+	db.Create(&cart)
+	return c.JSON(http.StatusCreated, cart)
+}
+
+// Get Cart (GET)
+func getCart(c echo.Context) error {
+	id := c.Param("id")
+	var cart Cart
+	if err := db.First(&cart, id).Error; err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Koszyk nie istnieje"})
+	}
+	return c.JSON(http.StatusOK, cart)
 }
 
 func main() {
@@ -99,6 +118,9 @@ func main() {
 	e.GET("/products/:id", getProduct)
 	e.PUT("/products/:id", updateProduct)
 	e.DELETE("/products/:id", deleteProduct)
+
+	e.POST("/carts", createCart)
+	e.GET("/carts/:id", getCart)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
