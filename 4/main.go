@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -11,6 +12,7 @@ import (
 
 var db *gorm.DB
 
+
 type Category struct {
 	gorm.Model
 	Name string `json:"name"`
@@ -18,8 +20,8 @@ type Category struct {
 
 type Product struct {
 	gorm.Model
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
+	Name       string   `json:"name"`
+	Price      float64  `json:"price"`
 	CategoryID uint     `json:"category_id"`
 	Category   Category `json:"category" gorm:"foreignKey:CategoryID"`
 }
@@ -35,15 +37,24 @@ func initDB() {
 	if err != nil {
 		panic("Nie udało się połączyć z bazą danych")
 	}
-
 	db.AutoMigrate(&Category{}, &Product{}, &Cart{})
+}
+
+func ActiveCarts(db *gorm.DB) *gorm.DB {
+	return db.Where("status = ?", "active")
+}
+
+func PriceGreaterThan(minPrice float64) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("price >= ?", minPrice)
+	}
 }
 
 
 func createCategory(c echo.Context) error {
 	cat := new(Category)
 	if err := c.Bind(cat); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format danych"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format"})
 	}
 	db.Create(cat)
 	return c.JSON(http.StatusCreated, cat)
@@ -59,7 +70,7 @@ func getCategories(c echo.Context) error {
 func createProduct(c echo.Context) error {
 	p := new(Product)
 	if err := c.Bind(p); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format danych"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format"})
 	}
 	db.Create(p)
 	return c.JSON(http.StatusCreated, p)
@@ -67,7 +78,17 @@ func createProduct(c echo.Context) error {
 
 func getProducts(c echo.Context) error {
 	var products []Product
-	db.Preload("Category").Find(&products)
+	
+	query := db.Preload("Category")
+
+	minPriceStr := c.QueryParam("min_price")
+	if minPriceStr != "" {
+		if minPrice, err := strconv.ParseFloat(minPriceStr, 64); err == nil {
+			query = query.Scopes(PriceGreaterThan(minPrice))
+		}
+	}
+
+	query.Find(&products)
 	return c.JSON(http.StatusOK, products)
 }
 
@@ -75,7 +96,7 @@ func getProduct(c echo.Context) error {
 	id := c.Param("id")
 	var p Product
 	if err := db.Preload("Category").First(&p, id).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Produkt nie istnieje"})
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Brak"})
 	}
 	return c.JSON(http.StatusOK, p)
 }
@@ -84,12 +105,12 @@ func updateProduct(c echo.Context) error {
 	id := c.Param("id")
 	var p Product
 	if err := db.First(&p, id).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Produkt nie istnieje"})
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Brak"})
 	}
 
 	updateData := new(Product)
 	if err := c.Bind(updateData); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format danych"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format"})
 	}
 
 	p.Name = updateData.Name
@@ -105,9 +126,8 @@ func deleteProduct(c echo.Context) error {
 	id := c.Param("id")
 	var p Product
 	if err := db.First(&p, id).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Produkt nie istnieje"})
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Brak"})
 	}
-
 	db.Delete(&p)
 	return c.NoContent(http.StatusNoContent)
 }
@@ -119,11 +139,17 @@ func createCart(c echo.Context) error {
 	return c.JSON(http.StatusCreated, cart)
 }
 
+func getActiveCartsList(c echo.Context) error {
+	var carts []Cart
+	db.Scopes(ActiveCarts).Find(&carts)
+	return c.JSON(http.StatusOK, carts)
+}
+
 func getCart(c echo.Context) error {
 	id := c.Param("id")
 	var cart Cart
 	if err := db.First(&cart, id).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Koszyk nie istnieje"})
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Brak"})
 	}
 	return c.JSON(http.StatusOK, cart)
 }
@@ -145,6 +171,7 @@ func main() {
 	e.DELETE("/products/:id", deleteProduct)
 
 	e.POST("/carts", createCart)
+	e.GET("/carts", getActiveCartsList) 
 	e.GET("/carts/:id", getCart)
 
 	e.Logger.Fatal(e.Start(":8080"))
