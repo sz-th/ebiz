@@ -2,102 +2,95 @@ package main
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
+var db *gorm.DB
+
 type Product struct {
-	ID    int     `json:"id"`
+	gorm.Model
 	Name  string  `json:"name"`
 	Price float64 `json:"price"`
 }
 
-var (
-	products = make(map[int]Product)
-	seq      = 1
-)
+func initDB() {
+	var err error
+	db, err = gorm.Open(sqlite.Open("ebiz.db"), &gorm.Config{})
+	if err != nil {
+		panic("Nie udało się połączyć z bazą danych")
+	}
 
-// CRUD
+	db.AutoMigrate(&Product{})
+}
 
-// Create (POST)
+//CRUD and GORM
+
+// Create
 func createProduct(c echo.Context) error {
 	p := new(Product)
 	if err := c.Bind(p); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Niepoprawne dane"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format danych"})
 	}
-	
-	p.ID = seq
-	products[seq] = *p
-	seq++
-	
+	db.Create(p)
 	return c.JSON(http.StatusCreated, p)
 }
 
-// Read All (GET)
+// Read All
 func getProducts(c echo.Context) error {
-	list := make([]Product, 0, len(products))
-	for _, p := range products {
-		list = append(list, p)
-	}
-	return c.JSON(http.StatusOK, list)
+	var products []Product
+	db.Find(&products)
+	return c.JSON(http.StatusOK, products)
 }
 
-// Read One (GET)
+// Read One
 func getProduct(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Niepoprawne ID"})
-	}
-
-	p, exists := products[id]
-	if !exists {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": "Produkt nie znaleziony"})
+	id := c.Param("id")
+	var p Product
+	if err := db.First(&p, id).Error; err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Produkt nie istnieje"})
 	}
 	return c.JSON(http.StatusOK, p)
 }
 
-// Update (PUT)
 func updateProduct(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Niepoprawne ID"})
+	id := c.Param("id")
+	var p Product
+	if err := db.First(&p, id).Error; err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Produkt nie istnieje"})
 	}
 
-	if _, exists := products[id]; !exists {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": "Produkt nie znaleziony"})
+	updateData := new(Product)
+	if err := c.Bind(updateData); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format danych"})
 	}
 
-	p := new(Product)
-	if err := c.Bind(p); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Niepoprawne dane"})
-	}
-	
-	p.ID = id
-	products[id] = *p
+	p.Name = updateData.Name
+	p.Price = updateData.Price
+	db.Save(&p)
 	
 	return c.JSON(http.StatusOK, p)
 }
 
-// Delete (DELETE)
+// Delete
 func deleteProduct(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Niepoprawne ID"})
+	id := c.Param("id")
+	var p Product
+	if err := db.First(&p, id).Error; err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Produkt nie istnieje"})
 	}
 
-	if _, exists := products[id]; !exists {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": "Produkt nie znaleziony"})
-	}
-
-	delete(products, id)
+	db.Delete(&p)
 	return c.NoContent(http.StatusNoContent)
 }
 
 func main() {
-	e := echo.New()
+	initDB()
 
+	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
