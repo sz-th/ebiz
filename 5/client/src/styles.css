@@ -15,8 +15,39 @@ body {
   padding: 24px;
 }
 
-.app h1 {
-  margin-top: 0;
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav a {
+  padding: 8px 14px;
+  text-decoration: none;
+  color: #1f2937;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.nav a.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
 }
 
 .section {
@@ -41,6 +72,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -49,8 +81,19 @@ body {
   border-bottom: none;
 }
 
+.product-list li span:first-child {
+  flex: 1;
+}
+
 .price {
   font-weight: 600;
+}
+
+.total {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: right;
+  margin: 16px 0;
 }
 
 form.payment-form {
@@ -75,13 +118,14 @@ form.payment-form select {
 }
 
 button {
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 8px;
   border: none;
   background: #2563eb;
   color: #fff;
   font-weight: 600;
   cursor: pointer;
+  font-size: 14px;
 }
 
 button:hover {

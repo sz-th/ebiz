@@ -1,11 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-export default function Payments() {
+export default function Payments({ total, onPaid }) {
   const [method, setMethod] = useState('card')
   const [amount, setAmount] = useState('')
   const [holder, setHolder] = useState('')
   const [status, setStatus] = useState(null)
   const [sending, setSending] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (typeof total === 'number' && total > 0) {
+      setAmount(total.toFixed(2))
+    }
+  }, [total])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -24,8 +32,9 @@ export default function Payments() {
       if (!res.ok) throw new Error('Płatność odrzucona')
       const data = await res.json()
       setStatus({ ok: true, msg: `Płatność ${data.id} przyjęta na kwotę ${data.amount.toFixed(2)} zł` })
-      setAmount('')
       setHolder('')
+      if (onPaid) onPaid()
+      setTimeout(() => navigate('/'), 1500)
     } catch (err) {
       setStatus({ ok: false, msg: err.message })
     } finally {

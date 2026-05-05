@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export default function Products() {
+export default function Products({ onAdd }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -40,6 +40,11 @@ export default function Products() {
             <li key={p.id}>
               <span>{p.name}</span>
               <span className="price">{p.price.toFixed(2)} zł</span>
+              {onAdd && (
+                <button type="button" onClick={() => onAdd(p)}>
+                  Dodaj do koszyka
+                </button>
+              )}
             </li>
           ))}
         </ul>
