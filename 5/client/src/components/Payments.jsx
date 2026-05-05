@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useCart } from '../context/CartContext.jsx'
 
-export default function Payments({ total, onPaid }) {
+export default function Payments() {
+  const { total, clear } = useCart()
   const [method, setMethod] = useState('card')
   const [amount, setAmount] = useState('')
   const [holder, setHolder] = useState('')
@@ -10,7 +12,7 @@ export default function Payments({ total, onPaid }) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (typeof total === 'number' && total > 0) {
+    if (total > 0) {
       setAmount(total.toFixed(2))
     }
   }, [total])
@@ -33,7 +35,7 @@ export default function Payments({ total, onPaid }) {
       const data = await res.json()
       setStatus({ ok: true, msg: `Płatność ${data.id} przyjęta na kwotę ${data.amount.toFixed(2)} zł` })
       setHolder('')
-      if (onPaid) onPaid()
+      clear()
       setTimeout(() => navigate('/'), 1500)
     } catch (err) {
       setStatus({ ok: false, msg: err.message })

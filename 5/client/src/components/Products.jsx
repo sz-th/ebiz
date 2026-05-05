@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useCart } from '../context/CartContext.jsx'
 
-export default function Products({ onAdd }) {
+export default function Products() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { addItem } = useCart()
 
   useEffect(() => {
     let active = true
@@ -40,11 +42,9 @@ export default function Products({ onAdd }) {
             <li key={p.id}>
               <span>{p.name}</span>
               <span className="price">{p.price.toFixed(2)} zł</span>
-              {onAdd && (
-                <button type="button" onClick={() => onAdd(p)}>
-                  Dodaj do koszyka
-                </button>
-              )}
+              <button type="button" onClick={() => addItem(p)}>
+                Dodaj do koszyka
+              </button>
             </li>
           ))}
         </ul>

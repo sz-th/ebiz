@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
+import { useCart } from '../context/CartContext.jsx'
 
-export default function Cart({ items, total, onRemove }) {
-  if (!items || items.length === 0) {
+export default function Cart() {
+  const { items, total, removeItem } = useCart()
+
+  if (items.length === 0) {
     return (
       <section className="section">
         <h2>Koszyk</h2>
@@ -23,7 +26,7 @@ export default function Cart({ items, total, onRemove }) {
             <span className="price">
               {(item.price * item.qty).toFixed(2)} zł
             </span>
-            <button type="button" onClick={() => onRemove(item.id)}>
+            <button type="button" onClick={() => removeItem(item.id)}>
               Usuń
             </button>
           </li>
