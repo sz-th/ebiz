@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../api.js'
 import { useCart } from '../context/CartContext.jsx'
 
 export default function Payments() {
@@ -22,23 +23,19 @@ export default function Payments() {
     setStatus(null)
     setSending(true)
     try {
-      const res = await fetch('/api/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          method,
-          amount: parseFloat(amount),
-          holder,
-        }),
+      const res = await api.post('/payments', {
+        method,
+        amount: parseFloat(amount),
+        holder,
       })
-      if (!res.ok) throw new Error('Płatność odrzucona')
-      const data = await res.json()
+      const data = res.data
       setStatus({ ok: true, msg: `Płatność ${data.id} przyjęta na kwotę ${data.amount.toFixed(2)} zł` })
       setHolder('')
       clear()
       setTimeout(() => navigate('/'), 1500)
     } catch (err) {
-      setStatus({ ok: false, msg: err.message })
+      const msg = err?.response?.data?.error || 'Płatność odrzucona'
+      setStatus({ ok: false, msg })
     } finally {
       setSending(false)
     }

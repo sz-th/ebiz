@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import api from '../api.js'
 import { useCart } from '../context/CartContext.jsx'
 
 export default function Products() {
@@ -9,20 +10,17 @@ export default function Products() {
 
   useEffect(() => {
     let active = true
-    fetch('/api/products')
+    api
+      .get('/products')
       .then((res) => {
-        if (!res.ok) throw new Error('Błąd pobierania produktów')
-        return res.json()
-      })
-      .then((data) => {
         if (active) {
-          setProducts(data)
+          setProducts(res.data)
           setLoading(false)
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (active) {
-          setError(err.message)
+          setError('Błąd pobierania produktów')
           setLoading(false)
         }
       })
