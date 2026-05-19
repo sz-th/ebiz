@@ -1,0 +1,31 @@
+name: SonarCloud Server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "5/server/**"
+      - ".github/workflows/sonar-server.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "5/server/**"
+      - ".github/workflows/sonar-server.yml"
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 5/server/go.mod
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: 5/server

@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+root="$(git rev-parse --show-toplevel)"
+server="$root/5/server"
+marker='hookLetter = "a"'
+
+if [ ! -f "$server/main.go" ]; then
+  echo "pre-commit: brak 5/server/main.go"
+  exit 1
+fi
+
+if ! grep -q "$marker" "$server/main.go"; then
+  echo "pre-commit: w main.go brak markera hookLetter (litera a)"
+  exit 1
+fi
+
+cd "$server"
+go vet ./...

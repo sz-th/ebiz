@@ -1,0 +1,25 @@
+Zadanie 7 SonarCloud
+
+Aplikacja serwerowa: 5/server (Go, Echo)
+Aplikacja kliencka: 5/client (React, Vite)
+SonarCloud: https://sonarcloud.io/ — dwa projekty (client + server), jeden branch (main)
+
+Konfiguracja Sonara
+- 5/server/sonar-project.properties
+- 5/client/sonar-project.properties
+- .github/workflows/sonar-server.yml
+- .github/workflows/sonar-client.yml
+Sekrety w GitHub: SONAR_TOKEN (z SonarCloud), GITHUB_TOKEN (domyślny).
+Po utworzeniu projektów w SonarCloud uzupełnij organization i projectKey w plikach powyżej oraz w README.
+
+✅3.0 litera „a” w kodzie serwera + hooki git — 7/3.0/ (install-hooks.ps1 / install-hooks.sh)
+⬜3.5 0 bugów (serwer) — wklej listę z SonarCloud dla 5/server
+⬜4.0 0 zapaszków (serwer) — wklej listę z SonarCloud dla 5/server
+⬜4.5 0 podatności i 0 security hotspots (serwer) — wklej listę z SonarCloud dla 5/server
+✅5.0 0 bugów i 0 zapaszków (klient) — 5/client
+
+Widżety Sonara w README:
+- 5/server/README.md
+- 5/client/README.md
+
+Cel jakości: 0 bugs, 0 code smells, 0 vulnerabilities, 0 security hotspots (oba projekty).

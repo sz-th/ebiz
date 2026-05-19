@@ -25,7 +25,7 @@ export default function Payments() {
     try {
       const res = await api.post('/payments', {
         method,
-        amount: parseFloat(amount),
+        amount: Number.parseFloat(amount),
         holder,
       })
       const data = res.data
@@ -34,7 +34,10 @@ export default function Payments() {
       clear()
       setTimeout(() => navigate('/'), 1500)
     } catch (err) {
-      const msg = err?.response?.data?.error || 'Płatność odrzucona'
+      const data = err.response?.data
+      const msg =
+        (data && typeof data.error === 'string' && data.error) ||
+        'Płatność odrzucona'
       setStatus({ ok: false, msg })
     } finally {
       setSending(false)
@@ -46,7 +49,7 @@ export default function Payments() {
       <h2>Płatności</h2>
       <form className="payment-form" onSubmit={handleSubmit}>
         <label>
-          Metoda
+          <span>Metoda</span>
           <select value={method} onChange={(e) => setMethod(e.target.value)}>
             <option value="card">Karta</option>
             <option value="blik">BLIK</option>
@@ -54,7 +57,7 @@ export default function Payments() {
           </select>
         </label>
         <label>
-          Imię i nazwisko
+          <span>Imię i nazwisko</span>
           <input
             type="text"
             value={holder}
@@ -63,7 +66,7 @@ export default function Payments() {
           />
         </label>
         <label>
-          Kwota (zł)
+          <span>Kwota (zł)</span>
           <input
             type="number"
             min="0.01"

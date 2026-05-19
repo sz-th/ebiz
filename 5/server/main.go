@@ -2,11 +2,15 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
+
+const hookLetter = "a"
 
 type Product struct {
 	ID    uint    `json:"id"`
@@ -45,6 +49,10 @@ func processPayment(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Zły format"})
 	}
+	holder := strings.TrimSpace(req.Holder)
+	if holder == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Imię i nazwisko jest wymagane"})
+	}
 	if req.Amount <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Kwota musi być większa od zera"})
 	}
@@ -58,14 +66,32 @@ func processPayment(c echo.Context) error {
 	return c.JSON(http.StatusCreated, resp)
 }
 
+func corsOrigins() []string {
+	raw := os.Getenv("CORS_ORIGINS")
+	if raw == "" {
+		return []string{"http://localhost:5173", "http://localhost:4173", "http://localhost"}
+	}
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if o := strings.TrimSpace(p); o != "" {
+			out = append(out, o)
+		}
+	}
+	return out
+}
+
 func main() {
+	if hookLetter != "a" {
+		panic("invalid hook marker")
+	}
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowOrigins: corsOrigins(),
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodOptions},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
 	e.GET("/products", getProducts)

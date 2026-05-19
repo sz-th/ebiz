@@ -1,0 +1,22 @@
+services:
+  scala-app:
+    build: ./2
+    ports:
+      - "8080:8080"
+    networks:
+      - ebiz-network
+
+  discord-bot:
+    build: ./3
+    env_file:
+      - ./3/.env
+    environment:
+      - SCALA_APP_URL=http://scala-app:8080
+    depends_on:
+      - scala-app
+    networks:
+      - ebiz-network
+
+networks:
+  ebiz-network:
+    driver: bridge
