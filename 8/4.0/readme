@@ -1,0 +1,22 @@
+CodeQL — przykład OSS (mini serwer HTTP)
+
+Projekt: `oss/` — prosty serwer Node.js (MIT, wzorowany na wzorcach z dokumentacji Node).
+
+## Wynik skanowania
+
+Reguła CodeQL: `js/path-injection` — odczyt dowolnego pliku przez parametr `file` w `/read`.
+
+## Naprawa
+
+W `oss/server.js` ścieżka jest normalizowana i ograniczona do katalogu `public/`.
+
+## Uruchomienie CodeQL (GitHub)
+
+Skopiuj `8/4.0/.github/workflows/codeql-oss.yml` do `.github/workflows/` i ustaw `paths` na `8/4.0/oss/**`, albo uruchom workflow z repozytorium po pushu.
+
+Lokalnie: [CodeQL CLI](https://codeql.github.com/docs/codeql-cli/) w katalogu `oss/`:
+
+```
+codeql database create ../db --language=javascript --source-root=.
+codeql database analyze ../db --format=sarif-latest --output=../results.sarif
+```

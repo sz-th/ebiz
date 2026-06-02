@@ -1,0 +1,30 @@
+name: CodeQL OSS (8/4.0)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "8/4.0/oss/**"
+      - "8/4.0/.github/workflows/codeql-oss.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "8/4.0/oss/**"
+      - "8/4.0/.github/workflows/codeql-oss.yml"
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          config-file: 8/4.0/codeql/codeql-config.yml
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3

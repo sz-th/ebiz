@@ -1,0 +1,5 @@
+name: ebiz-oss-fileserver
+paths:
+  - 8/4.0/oss
+paths-ignore:
+  - 8/4.0/oss/server.vulnerable.js
