@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+root="$(git rev-parse --show-toplevel)"
+base="$(cd "$(dirname "$0")" && pwd)"
+cp "$base/overlay/1/4.5/src/main/kotlin/Main.kt" "$root/1/4.5/src/main/kotlin/Main.kt"
+cp "$base/overlay/4/main.go" "$root/4/main.go"
+cp "$base/overlay/4/README.md" "$root/4/README.md"
+cp "$base/overlay/3/app/src/main/kotlin/bot/App.kt" "$root/3/app/src/main/kotlin/bot/App.kt"
+cp "$base/overlay/3/README.md" "$root/3/README.md"
+cp "$base/overlay/6/api/tests/client.js" "$root/6/api/tests/client.js"
+cp "$base/overlay/6/api/README.md" "$root/6/api/README.md"
+cp "$base/config/3/sonar-project.properties" "$root/3/sonar-project.properties"
+cp "$base/config/4/sonar-project.properties" "$root/4/sonar-project.properties"
+cp "$base/config/6/api/sonar-project.properties" "$root/6/api/sonar-project.properties"
+cp "$base/config/6/unit/sonar-project.properties" "$root/6/unit/sonar-project.properties"
+echo "Code smells + Sonar: 1/4.5, 3, 4, 6/api, 6/unit"
