@@ -1,0 +1,39 @@
+services:
+  server:
+    build:
+      context: ../../5/server
+      dockerfile: Dockerfile
+    image: ebiz-server:local
+    container_name: ebiz-server
+    ports:
+      - "8080:8080"
+    environment:
+      CORS_ORIGINS: "http://localhost:5173,http://localhost,http://client"
+    networks:
+      - ebiz-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/products"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  client:
+    build:
+      context: ../../5/client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8080
+    image: ebiz-client:local
+    container_name: ebiz-client
+    ports:
+      - "5173:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    networks:
+      - ebiz-net
+
+networks:
+  ebiz-net:
+    driver: bridge

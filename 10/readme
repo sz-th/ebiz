@@ -1,0 +1,46 @@
+Zadanie 10 - CI/CD, Docker, Sonar, deployment, BrowserStack
+
+Aplikacja: 5/server (Go) + 5/client (React), bot Kotlin (3), testy E2E (6/e2e)
+
+| Punkt | Opis | Folder |
+|-------|------|--------|
+| 3.0 | Instancje Docker (serwer + klient) | 10/3.0/ |
+| 3.5 | Pipeline GitHub Actions (build, fatjar) | 10/3.5/ |
+| 4.0 | Notyfikacja mailowa wyników Sonar | 10/4.0/ |
+| 4.5 | Deployment na chmurę (klient + serwer) | 10/4.5/ |
+| 5.0 | Testy regresyjne BrowserStack w Actions | 10/5.0/ |
+
+## Uruchomienie Docker (3.0)
+
+```powershell
+cd 10\3.0
+docker compose up --build
+```
+
+Klient: http://localhost:5173, serwer: http://localhost:8080
+
+## Wdrożenie pipeline (3.5-5.0)
+
+```powershell
+.\10\5.0\apply.ps1
+```
+
+Kopiuje workflow do `.github/workflows/ebiz-pipeline.yml`.
+
+## Sekrety GitHub
+
+| Sekret | Opis |
+|--------|------|
+| SONAR_TOKEN | Token SonarCloud |
+| MAIL_SERVER | Host SMTP |
+| MAIL_PORT | Port SMTP (np. 587) |
+| MAIL_USERNAME | Login SMTP |
+| MAIL_PASSWORD | Hasło SMTP |
+| MAIL_TO | Adres odbiorcy |
+| DOCKERHUB_USERNAME | Login Docker Hub |
+| DOCKERHUB_TOKEN | Token Docker Hub |
+| DEPLOY_HOST | Adres VM (np. user@1.2.3.4) |
+| DEPLOY_SSH_KEY | Klucz prywatny SSH |
+| DEPLOY_URL | URL klienta po deploy (np. http://1.2.3.4:5173) |
+| BROWSERSTACK_USERNAME | Login BrowserStack |
+| BROWSERSTACK_ACCESS_KEY | Klucz BrowserStack |
