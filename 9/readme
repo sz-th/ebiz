@@ -1,0 +1,30 @@
+Zadanie 9 - rozszerzenie bota Discord (folder 3)
+
+## 3.0 Serwis GPT (Python)
+
+Osobny serwis FastAPI laczacy sie z Ollama lub OpenAI.
+
+### Uruchomienie
+
+```bash
+cd 9
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn gpt_service.main:app --reload --port 8000
+```
+
+### Konfiguracja (.env)
+
+```
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.2
+LLM_PROVIDER=ollama
+```
+
+Dla OpenAI ustaw `LLM_PROVIDER=openai` oraz `OPENAI_API_KEY`.
+
+### API
+
+- `GET /health` - status serwisu
+- `POST /chat` - `{"message": "..."}` -> `{"reply": "..."}`
