@@ -11,9 +11,12 @@ from gpt_service.phrases import (
     pick_closing,
     pick_opening,
 )
+from gpt_service.topic_filter import OFF_TOPIC_REPLY, is_shop_related
 
 SYSTEM_PROMPT = (
-    "Jestes pomocnym asystentem sklepu internetowego. "
+    "Jestes asystentem sklepu internetowego z odzieza. "
+    "Odpowiadaj wylacznie na pytania o sklep, ubrania, produkty, rozmiary, "
+    "zamowienia, dostawe i zwroty. Odmawiaj tematow spoza sklepu. "
     "Odpowiadaj po polsku, krotko i rzeczowo."
 )
 
@@ -53,6 +56,9 @@ async def chat(request: ChatRequest):
 
     if is_farewell(message):
         return ChatResponse(reply=pick_closing(), kind="closing")
+
+    if not is_shop_related(message):
+        return ChatResponse(reply=OFF_TOPIC_REPLY, kind="filtered")
 
     try:
         reply = await generate_reply(SYSTEM_PROMPT, message)

@@ -51,3 +51,7 @@ Serwis zawiera 5 otwarc i 5 zamkniec (`gpt_service/phrases.py`). Przy powitaniu 
 - `GET /phrases` - lista wszystkich otwarc i zamkniec
 - slowa powitalne: cześć, hej, witam, dzień dobry
 - slowa pozegnalne: do widzenia, pa, koniec, dziękuję
+
+## 4.5 Filtrowanie tematow sklepu
+
+Pytania spoza sklepu i odziezy sa odrzucane przed wyslaniem do modelu (`gpt_service/topic_filter.py`). Odpowiedz ma `kind: "filtered"`.
