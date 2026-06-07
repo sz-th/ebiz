@@ -55,3 +55,7 @@ Serwis zawiera 5 otwarc i 5 zamkniec (`gpt_service/phrases.py`). Przy powitaniu 
 ## 4.5 Filtrowanie tematow sklepu
 
 Pytania spoza sklepu i odziezy sa odrzucane przed wyslaniem do modelu (`gpt_service/topic_filter.py`). Odpowiedz ma `kind: "filtered"`.
+
+## 5.0 Filtrowanie sentymentu
+
+Odpowiedzi modelu sa analizowane pod katem sentymentu (`gpt_service/sentiment.py`). Negatywne odpowiedzi sa zastepowane komunikatem dla uzytkownika (`kind: "sentiment_filtered"`). Pole `sentiment` przyjmuje wartosci: `positive`, `neutral`, `negative`.
