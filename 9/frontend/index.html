@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asystent sklepu</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="chat-app">
+    <header>
+      <h1>Asystent sklepu</h1>
+      <p>Napisz pytanie o produkty, zamowienia lub sklep.</p>
+    </header>
+    <section id="messages" class="messages" aria-live="polite"></section>
+    <form id="chat-form" class="chat-form">
+      <input id="message-input" type="text" placeholder="Twoja wiadomosc..." autocomplete="off" required>
+      <button type="submit">Wyslij</button>
+    </form>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
