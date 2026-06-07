@@ -1,0 +1,30 @@
+services:
+  server:
+    image: ${DOCKERHUB_USERNAME}/ebiz-server:latest
+    container_name: ebiz-server
+    restart: unless-stopped
+    environment:
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    networks:
+      - ebiz-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/products"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  client:
+    image: ${DOCKERHUB_USERNAME}/ebiz-client:latest
+    container_name: ebiz-client
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    networks:
+      - ebiz-net
+
+networks:
+  ebiz-net:
+    driver: bridge
