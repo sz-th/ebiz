@@ -43,3 +43,11 @@ Frontend JS laczy sie z botem Kotlin (port 8090), ktory przekazuje zapytania do 
 
 - `POST /api/chat` - `{"message": "..."}` -> `{"reply": "..."}`
 - Discord: `!chat <pytanie>`
+
+## 4.0 Otwarcia i zamkniecia rozmowy
+
+Serwis zawiera 5 otwarc i 5 zamkniec (`gpt_service/phrases.py`). Przy powitaniu lub pozegnaniu zwracane sa gotowe frazy zamiast zapytania do modelu.
+
+- `GET /phrases` - lista wszystkich otwarc i zamkniec
+- slowa powitalne: cześć, hej, witam, dzień dobry
+- slowa pozegnalne: do widzenia, pa, koniec, dziękuję
