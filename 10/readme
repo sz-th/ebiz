@@ -22,10 +22,20 @@ Klient: http://localhost:5173, serwer: http://localhost:8080
 ## Wdrożenie pipeline (3.5-5.0)
 
 ```powershell
+.\10\3.0\apply.ps1
 .\10\5.0\apply.ps1
 ```
 
-Kopiuje workflow do `.github/workflows/ebiz-pipeline.yml`.
+`apply.ps1` z najnowszego punktu kopiuje pelny workflow do `.github/workflows/ebiz-pipeline.yml`.
+
+## Deployment na chmurze (4.5)
+
+Klient nginx przekierowuje `/products` i `/payments` do kontenera serwera.
+Na VM: `docker compose -f docker-compose.cloud.yml up -d` (plik wgrywany przez pipeline).
+
+## Testy BrowserStack (5.0)
+
+Po deploy uruchamiane sa 20 testow Cypress z `6/e2e` na BrowserStack (Chrome + Firefox).
 
 ## Sekrety GitHub
 

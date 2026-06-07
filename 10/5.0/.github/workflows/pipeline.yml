@@ -1,0 +1,244 @@
+name: eBiz Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "3/**"
+      - "5/**"
+      - "6/**"
+      - "10/**"
+      - ".github/workflows/ebiz-pipeline.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "3/**"
+      - "5/**"
+      - "6/**"
+      - "10/**"
+      - ".github/workflows/ebiz-pipeline.yml"
+  workflow_dispatch:
+
+env:
+  REGISTRY: docker.io
+
+jobs:
+  build-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 5/server/go.mod
+      - name: Build Go server
+        working-directory: 5/server
+        run: CGO_ENABLED=0 go build -o ebiz-server .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ebiz-server
+          path: 5/server/ebiz-server
+          retention-days: 7
+
+  build-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: 5/client/package-lock.json
+      - name: Zastosuj konfiguracje chmurowa klienta
+        run: |
+          cp 10/4.5/overlay/client/nginx.conf 5/client/nginx.conf
+          cp 10/4.5/overlay/client/Dockerfile 5/client/Dockerfile
+          cp 10/4.5/overlay/client/src/api.js 5/client/src/api.js
+      - name: Build React client
+        working-directory: 5/client
+        env:
+          VITE_API_URL: ""
+        run: |
+          npm ci
+          npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ebiz-client-dist
+          path: 5/client/dist
+          retention-days: 7
+
+  build-bot-fatjar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Build Kotlin fatjar (shadowJar)
+        working-directory: 3
+        run: ./gradlew :app:shadowJar --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bot-fatjar
+          path: 3/app/build/libs/*-all.jar
+          retention-days: 7
+
+  sonar-server:
+    runs-on: ubuntu-latest
+    needs: build-server
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 5/server/go.mod
+      - name: SonarCloud scan (server)
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: 5/server
+
+  sonar-client:
+    runs-on: ubuntu-latest
+    needs: build-client
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: SonarCloud scan (client)
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: 5/client
+
+  sonar-email:
+    runs-on: ubuntu-latest
+    needs: [sonar-server, sonar-client]
+    if: always() && (needs.sonar-server.result != 'skipped' || needs.sonar-client.result != 'skipped')
+    steps:
+      - name: Ustal status skanów
+        id: status
+        run: |
+          server="${{ needs.sonar-server.result }}"
+          client="${{ needs.sonar-client.result }}"
+          if [ "$server" = "success" ] && [ "$client" = "success" ]; then
+            echo "overall=OK" >> "$GITHUB_OUTPUT"
+            echo "body=SonarCloud: serwer ($server), klient ($client). Oba skany zakonczone pomyslnie." >> "$GITHUB_OUTPUT"
+          else
+            echo "overall=FAIL" >> "$GITHUB_OUTPUT"
+            echo "body=SonarCloud: serwer ($server), klient ($client). Sprawdz logi workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Wyslij mail z wynikami Sonar
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "[eBiz] Sonar ${{ steps.status.outputs.overall }} - ${{ github.repository }}"
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_USERNAME }}
+          body: |
+            Repozytorium: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Autor: ${{ github.actor }}
+
+            ${{ steps.status.outputs.body }}
+
+            Link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-server, build-client, sonar-server, sonar-client]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Przygotuj pliki klienta (proxy do serwera)
+        run: |
+          cp 10/4.5/overlay/client/nginx.conf 5/client/nginx.conf
+          cp 10/4.5/overlay/client/Dockerfile 5/client/Dockerfile
+          cp 10/4.5/overlay/client/src/api.js 5/client/src/api.js
+      - name: Logowanie Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build i push serwer
+        uses: docker/build-push-action@v6
+        with:
+          context: 5/server
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ebiz-server:latest,${{ secrets.DOCKERHUB_USERNAME }}/ebiz-server:${{ github.sha }}
+      - name: Build i push klient
+        uses: docker/build-push-action@v6
+        with:
+          context: 5/client
+          push: true
+          build-args: |
+            VITE_API_URL=
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ebiz-client:latest,${{ secrets.DOCKERHUB_USERNAME }}/ebiz-client:${{ github.sha }}
+      - name: Wgraj docker-compose na VM
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_deploy
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_deploy \
+            10/4.5/docker-compose.cloud.yml \
+            "${{ secrets.DEPLOY_HOST }}:~/ebiz/docker-compose.yml"
+      - name: Uruchom aplikacje na chmurze
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_deploy "${{ secrets.DEPLOY_HOST }}" << EOF
+          set -e
+          mkdir -p ~/ebiz
+          cd ~/ebiz
+          export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+          export CORS_ORIGINS=${{ secrets.DEPLOY_URL }}
+          docker compose pull
+          docker compose up -d
+          EOF
+
+  e2e-browserstack:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: 6/e2e/package-lock.json
+      - name: Przygotuj konfiguracje Cypress
+        run: |
+          cp 10/5.0/overlay/e2e/cypress.config.js 6/e2e/cypress.config.js
+          cp 10/5.0/browserstack.json 6/e2e/browserstack.json
+      - name: Instalacja zaleznosci E2E
+        working-directory: 6/e2e
+        run: npm ci
+      - name: Oczekiwanie na dostepnosc aplikacji
+        env:
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf "$DEPLOY_URL" > /dev/null; then
+              echo "Aplikacja dostepna: $DEPLOY_URL"
+              exit 0
+            fi
+            echo "Proba $i/30..."
+            sleep 10
+          done
+          echo "Aplikacja niedostepna pod $DEPLOY_URL"
+          exit 1
+      - name: Testy regresyjne BrowserStack
+        working-directory: 6/e2e
+        env:
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          CYPRESS_BASE_URL: ${{ secrets.DEPLOY_URL }}
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+        run: npx browserstack-cypress run --sync --cf browserstack.json
