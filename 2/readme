@@ -1,0 +1,7 @@
+Zadanie 2 Scala
+
+✅3.0 stworzenie kontrolera i modelu dla Produktów https://github.com/sz-th/ebiz/commit/43eadabbed992f0289d5475679395fa809caf7ac
+✅3.5 endpointy CRUD dla listy produktów https://github.com/sz-th/ebiz/commit/2abd8050b6c633c67ccdf1051c3793154ad87c1f
+✅4.0 kontrolery i modele Category oraz Cart z pełnym CRUD https://github.com/sz-th/ebiz/commit/352de941f30c559bf2ddd4ca567b00d87821830d
+✅4.5 konfiguracja Docker i skrypt ngrok https://github.com/sz-th/ebiz/commit/869d3f57d32351c1e58cfe91ead7b17f93955f92
+✅5.0 konfiguracja CORS w Scalatra dla dwóch hostów i wszystkich endpointów https://github.com/sz-th/ebiz/commit/2e60c8c280c4a862dfd2df1d1fc81fcd953da217

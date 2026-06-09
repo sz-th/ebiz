@@ -1,0 +1,7 @@
+Zadanie 6 Testy
+
+✅3.0 20 przypadków testowych w CypressJS https://github.com/sz-th/ebiz/commit/4c5caa156f78ca3bac93f407d9aa6aa98c58d326
+✅3.5 rozszerzenie testów funkcjonalnych do minimum 50 asercji https://github.com/sz-th/ebiz/commit/6c07e2be77b47624101223586fe05bfd4b293f5f
+✅4.0 testy jednostkowe do wybranego projektu z minimum 50 asercjami https://github.com/sz-th/ebiz/commit/6605106136b2c161e9d2a6f5c9e4214e6aeab3c1
+✅4.5 testy API ze scenariuszem negatywnym per endpoint https://github.com/sz-th/ebiz/commit/c02ca6532a3c22f4a7b8b20c1d746e06d0bb233f
+⬜5.0 uruchomienie testów funkcjonalnych na BrowserStacku

@@ -1,0 +1,7 @@
+Zadanie 4 Backend Go
+
+✅3.0 API REST w Go (Echo) z CRUD produktów https://github.com/sz-th/ebiz/commit/880217268fbac120a06cb192378a212355449879
+✅3.5 persystencja SQLite przez GORM https://github.com/sz-th/ebiz/commit/e77db6c3320b3d3eb9a59d6607dd4c81927ac246
+✅4.0 model Koszyk z endpointami https://github.com/sz-th/ebiz/commit/b59a1f2d35ad393fc8c3a91a70aaa7176a498682
+✅4.5 model Kategoria z relacją do produktów https://github.com/sz-th/ebiz/commit/0ecf9352077c7f06996369311f85e06047936a78
+✅5.0 scope'y GORM (ActiveCarts, filtrowanie ceny) https://github.com/sz-th/ebiz/commit/1855fba9365abfe32defd79b8d9def23f2bdc0c6

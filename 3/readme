@@ -1,0 +1,7 @@
+Zadanie 3 Bot Discord
+
+✅3.0 bot Discord w Kotlinie (Ktor) z obsługą komend https://github.com/sz-th/ebiz/commit/c86bf6bdac511d60624ef39ee085668761c9f680
+✅3.5 integracja z API Scala (!products, !categories) https://github.com/sz-th/ebiz/commit/c86bf6bdac511d60624ef39ee085668761c9f680
+✅4.0 Dockerfile dla bota https://github.com/sz-th/ebiz/commit/c86bf6bdac511d60624ef39ee085668761c9f680
+✅4.5 integracja ze Slackiem https://github.com/sz-th/ebiz/commit/c86bf6bdac511d60624ef39ee085668761c9f680
+✅5.0 docker-compose z API Scala i botem https://github.com/sz-th/ebiz/commit/c86bf6bdac511d60624ef39ee085668761c9f680

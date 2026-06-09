@@ -1,56 +1,7 @@
-Zadanie 10 - CI/CD, Docker, Sonar, deployment, BrowserStack
+Zadanie 10 — CI/CD, Docker, Sonar, deployment, BrowserStack
 
-Aplikacja: 5/server (Go) + 5/client (React), bot Kotlin (3), testy E2E (6/e2e)
-
-| Punkt | Opis | Folder |
-|-------|------|--------|
-| 3.0 | Instancje Docker (serwer + klient) | 10/3.0/ |
-| 3.5 | Pipeline GitHub Actions (build, fatjar) | 10/3.5/ |
-| 4.0 | Notyfikacja mailowa wyników Sonar | 10/4.0/ |
-| 4.5 | Deployment na chmurę (klient + serwer) | 10/4.5/ |
-| 5.0 | Testy regresyjne BrowserStack w Actions | 10/5.0/ |
-
-## Uruchomienie Docker (3.0)
-
-```powershell
-cd 10\3.0
-docker compose up --build
-```
-
-Klient: http://localhost:5173, serwer: http://localhost:8080
-
-## Wdrożenie pipeline (3.5-5.0)
-
-```powershell
-.\10\3.0\apply.ps1
-.\10\5.0\apply.ps1
-```
-
-`apply.ps1` z najnowszego punktu kopiuje pelny workflow do `.github/workflows/ebiz-pipeline.yml`.
-
-## Deployment na chmurze (4.5)
-
-Klient nginx przekierowuje `/products` i `/payments` do kontenera serwera.
-Na VM: `docker compose -f docker-compose.cloud.yml up -d` (plik wgrywany przez pipeline).
-
-## Testy BrowserStack (5.0)
-
-Po deploy uruchamiane sa 20 testow Cypress z `6/e2e` na BrowserStack (Chrome + Firefox).
-
-## Sekrety GitHub
-
-| Sekret | Opis |
-|--------|------|
-| SONAR_TOKEN | Token SonarCloud |
-| MAIL_SERVER | Host SMTP |
-| MAIL_PORT | Port SMTP (np. 587) |
-| MAIL_USERNAME | Login SMTP |
-| MAIL_PASSWORD | Hasło SMTP |
-| MAIL_TO | Adres odbiorcy |
-| DOCKERHUB_USERNAME | Login Docker Hub |
-| DOCKERHUB_TOKEN | Token Docker Hub |
-| DEPLOY_HOST | Adres VM (np. user@1.2.3.4) |
-| DEPLOY_SSH_KEY | Klucz prywatny SSH |
-| DEPLOY_URL | URL klienta po deploy (np. http://1.2.3.4:5173) |
-| BROWSERSTACK_USERNAME | Login BrowserStack |
-| BROWSERSTACK_ACCESS_KEY | Klucz BrowserStack |
+✅3.0 instancje Docker (serwer + klient) — 10/3.0/ https://github.com/sz-th/ebiz/commit/89b042fa756be42466841723c4c252d5a4388039
+✅3.5 pipeline GitHub Actions (build, fatjar) — 10/3.5/ https://github.com/sz-th/ebiz/commit/ca8b4e1480059fb4d3b9b509760ddeb4f76e90ba
+✅4.0 notyfikacja mailowa wyników Sonar — 10/4.0/ https://github.com/sz-th/ebiz/commit/2b48e8a52595fed6b8e2ccb7e1b574d21f0e338b
+✅4.5 deployment na chmurę (klient + serwer) — 10/4.5/ https://github.com/sz-th/ebiz/commit/3e4d278cc861d47913f438005746f9968d7490c3
+✅5.0 testy regresyjne BrowserStack w Actions — 10/5.0/ https://github.com/sz-th/ebiz/commit/8f8b87c77dda36a6399773c5f95e536513ee1492

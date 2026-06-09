@@ -1,61 +1,7 @@
-Zadanie 9 - rozszerzenie bota Discord (folder 3)
+Zadanie 9 — rozszerzenie bota Discord (folder 3)
 
-## 3.0 Serwis GPT (Python)
-
-Osobny serwis FastAPI laczacy sie z Ollama lub OpenAI.
-
-### Uruchomienie
-
-```bash
-cd 9
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn gpt_service.main:app --reload --port 8000
-```
-
-### Konfiguracja (.env)
-
-```
-OLLAMA_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=llama3.2
-LLM_PROVIDER=ollama
-```
-
-Dla OpenAI ustaw `LLM_PROVIDER=openai` oraz `OPENAI_API_KEY`.
-
-### API
-
-- `GET /health` - status serwisu
-- `POST /chat` - `{"message": "..."}` -> `{"reply": "..."}`
-
-## 3.5 Frontend + most Kotlin
-
-Frontend JS laczy sie z botem Kotlin (port 8090), ktory przekazuje zapytania do serwisu GPT.
-
-### Uruchomienie
-
-1. Serwis GPT: `uvicorn gpt_service.main:app --reload --port 8000`
-2. Most Kotlin: `.\9\3.5\apply.ps1`, potem `./gradlew :app:run` w folderze `3`
-3. Frontend: otworz `9/frontend/index.html` w przegladarce
-
-### API mostu (Kotlin, port 8090)
-
-- `POST /api/chat` - `{"message": "..."}` -> `{"reply": "..."}`
-- Discord: `!chat <pytanie>`
-
-## 4.0 Otwarcia i zamkniecia rozmowy
-
-Serwis zawiera 5 otwarc i 5 zamkniec (`gpt_service/phrases.py`). Przy powitaniu lub pozegnaniu zwracane sa gotowe frazy zamiast zapytania do modelu.
-
-- `GET /phrases` - lista wszystkich otwarc i zamkniec
-- slowa powitalne: cześć, hej, witam, dzień dobry
-- slowa pozegnalne: do widzenia, pa, koniec, dziękuję
-
-## 4.5 Filtrowanie tematow sklepu
-
-Pytania spoza sklepu i odziezy sa odrzucane przed wyslaniem do modelu (`gpt_service/topic_filter.py`). Odpowiedz ma `kind: "filtered"`.
-
-## 5.0 Filtrowanie sentymentu
-
-Odpowiedzi modelu sa analizowane pod katem sentymentu (`gpt_service/sentiment.py`). Negatywne odpowiedzi sa zastepowane komunikatem dla uzytkownika (`kind: "sentiment_filtered"`). Pole `sentiment` przyjmuje wartosci: `positive`, `neutral`, `negative`.
+✅3.0 serwis GPT (Python/FastAPI) z Ollama lub OpenAI — 9/gpt_service/ https://github.com/sz-th/ebiz/commit/75cb7c93b0c0c13411e45d87bbc02d741e2818f3
+✅3.5 frontend JS + most Kotlin do bota Discord — 9/3.5/ https://github.com/sz-th/ebiz/commit/f308f4095b1c906cf4df6479f9873d5749e69454
+✅4.0 5 otwarć i 5 zamknięć rozmowy — gpt_service/phrases.py https://github.com/sz-th/ebiz/commit/c4afaa6b092851aeecf8dfa9a2893c15fd1d896a
+✅4.5 filtrowanie tematów sklepu — gpt_service/topic_filter.py https://github.com/sz-th/ebiz/commit/440100a62b396bf5667062d202f1b0ae5c4f5e0e
+✅5.0 filtrowanie sentymentu odpowiedzi — gpt_service/sentiment.py https://github.com/sz-th/ebiz/commit/d99e9e64100200469e97d999b8ac683d7a80df3a

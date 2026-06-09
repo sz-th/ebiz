@@ -1,0 +1,7 @@
+Zadanie 5 Frontend
+
+✅3.0 komponenty Produkty (GET) oraz Płatności (POST) z serwerem Go https://github.com/sz-th/ebiz/commit/80a7a4bf1e43a100854298cc55953d12548c4af6
+✅3.5 Koszyk z widokiem i routingiem https://github.com/sz-th/ebiz/commit/ec64405efaddab1bef6093daea626ca7cee8b4d8
+✅4.0 wspólny stan między komponentami przez React hooks (CartContext) https://github.com/sz-th/ebiz/commit/3b8a8611869dbc8749df55932fd984e82827d004
+✅4.5 skrypt uruchamiający aplikację serwerową i kliencką na dockerze via docker-compose https://github.com/sz-th/ebiz/commit/f16b2eb563cb93331e753b63ca02c4801647fbd1
+✅5.0 axios oraz nagłówki CORS https://github.com/sz-th/ebiz/commit/49d78e4a63e68cf1fa6a36bc15159353c1c97fa9
